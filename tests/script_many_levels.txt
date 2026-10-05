@@ -1,3 +1,4 @@
+help
 uname
 uptime
 ls
@@ -13,5 +14,20 @@ cd home
 ls
 cd ..
 ls
+mkdir new_dir
+ls
+cd new_dir
+ls
+cd ..
+mkdir newdir
+mv newdir renamed
+ls
+cd renamed
+cd ..
+mkdir "папка с пробелами"
+ls
+mv "папка с пробелами" spaces
+ls
+mv renamed newdir
 ls
 uptime

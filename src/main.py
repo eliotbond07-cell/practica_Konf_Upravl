@@ -128,6 +128,12 @@ def run_command(cmd, args):
         return cmd_uname()
     if cmd == "vfs-init":
         return cmd_vfs_init()
+    if cmd == "mkdir":
+        return cmd_mkdir(args)
+    if cmd == "mv":
+        return cmd_mv(args)
+    if cmd == "help":
+        return cmd_help()
     if cmd == "exit":
         return cmd_exit()
 
@@ -238,6 +244,94 @@ def cmd_vfs_init():
     else:
         print_line("vfs-init: VFS сброшена к default")
 
+    return True
+
+def cmd_mkdir(args):
+    """Создаёт новую папку в текущей директории.
+
+    Args:
+        args (list[str]): Имя папки.
+
+    Returns:
+        bool: True при успехе.
+    """
+    if len(args) != 1:
+        print_line("mkdir: требуется ровно одно имя папки")
+        return False
+
+    name = args[0]
+    if "/" in name or name in (".", ".."):
+        print_line(f"mkdir: недопустимое имя: {name}")
+        return False
+
+    node = get_node(cwd)
+    if node is None or node.get("type") != "dir":
+        print_line("mkdir: текущая папка недоступна")
+        return False
+
+    if find_child(node, name) is not None:
+        print_line(f"mkdir: уже существует: {name}")
+        return False
+
+    node.setdefault("children", []).append(
+        {"type": "dir", "name": name, "children": []}
+    )
+    print_line(f"mkdir: создана папка: {name}")
+    return True
+
+def cmd_mv(args):
+    """Перемещает или переименовывает файл/папку.
+
+    Поддерживает:
+        mv <src> <dst> - переименование или перенос.
+
+    Args:
+        args (list[str]): Два аргумента: источник и назначение.
+
+    Returns:
+        bool: True при успехе.
+    """
+    if len(args) != 2:
+        print_line("mv: требуется <источник> <назначение>")
+        return False
+
+    src, dst = args
+    if "/" in src or "/" in dst:
+        print_line("mv: пути с '/' пока не поддерживаются")
+        return False
+
+    node = get_node(cwd)
+    if node is None or node.get("type") != "dir":
+        print_line("mv: текущая папка недоступна")
+        return False
+
+    found = find_parent_and_index(node, src)
+    if found is None:
+        print_line(f"mv: нет такого объекта: {src}")
+        return False
+
+    child, _ = found
+    existing = find_child(node, dst)
+    if existing is not None:
+        print_line(f"mv: назначение уже существует: {dst}")
+        return False
+
+    child["name"] = dst
+    print_line(f"mv: {src} -> {dst}")
+    return True
+
+def cmd_help():
+    """Выводит список команд с описанием."""
+    print_line("Доступные команды:")
+    print_line("  ls               - содержимое текущей папки")
+    print_line("  cd [папка|..|/]  - сменить папку")
+    print_line("  mkdir <имя>      - создать папку")
+    print_line("  mv <src> <dst>   - переименовать/перенести")
+    print_line("  vfs-init         - сброс VFS к default")
+    print_line("  uptime           - время работы")
+    print_line("  uname            - информация о системе")
+    print_line("  help             - эта справка")
+    print_line("  exit             - выход")
     return True
 
 def cmd_exit():
@@ -401,6 +495,36 @@ def get_node(path_parts):
             return None
         node = found
     return node
+
+def find_child(parent, name):
+    """Ищет ребёнка по имени в узле-папке.
+
+    Args:
+        parent (dict): Узел-папка.
+        name (str): Имя искомого ребёнка.
+
+    Returns:
+        dict | None: Найденный узел или None.
+    """
+    for child in parent.get("children", []):
+        if child["name"] == name:
+            return child
+    return None
+
+def find_parent_and_index(parent, name):
+    """Ищет ребёнка и его индекс в списке children.
+
+    Args:
+        parent (dict): Узел-папка.
+        name (str): Имя искомого ребёнка.
+
+    Returns:
+        tuple[dict, int] | None: (ребёнок, индекс) или None.
+    """
+    for i, child in enumerate(parent.get("children", [])):
+        if child["name"] == name:
+            return child, i
+    return None
 
 def main():
     """Точка входа в программу"""
