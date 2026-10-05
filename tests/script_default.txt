@@ -1,0 +1,6 @@
+ls
+ls -la /tmp
+ls "моя папка"
+cd
+cd /home/user
+cd "путь с пробелами"

@@ -1,0 +1,6 @@
+ls
+ls -la /tmp
+ls "моя папка"
+hippo
+ls fhk
+exit
