@@ -1,0 +1,17 @@
+uname
+uptime
+ls
+cd usr
+ls
+cd local
+ls
+cd share
+ls
+cd /
+ls
+cd home
+ls
+cd ..
+ls
+ls
+uptime

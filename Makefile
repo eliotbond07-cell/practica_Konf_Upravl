@@ -15,7 +15,7 @@ run-vfs-few:
 	$(PYTHON) $(MAIN) --vfs $(VFS)/vfs_few_files.json --script $(SCRIPTS)/script_default.txt
 
 run-vfs-many:
-	$(PYTHON) $(MAIN) --vfs $(VFS)/vfs_many_levels.json --script $(SCRIPTS)/script_default.txt
+	$(PYTHON) $(MAIN) --vfs $(VFS)/vfs_many_levels.json --script $(SCRIPTS)/script_many_levels.txt
 
 run-error:
 	$(PYTHON) $(MAIN) --vfs ./vfs/vfs_minimal.json

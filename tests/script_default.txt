@@ -1,10 +1,10 @@
+uname
+uptime
 ls
-ls -la /tmp
-ls "моя папка"
 cd
-cd ..
 cd /
-cd /home/user
-cd "путь с пробелами"
-vfs-init
 ls
+ls
+cd ..
+ls
+uptime
