@@ -1,0 +1,14 @@
+{
+  "type": "dir",
+  "name": "/",
+  "children": [
+    {"type": "file", "name": "readme.txt",
+     "encoding": "utf-8", "content": "Hello, VFS!"},
+    {"type": "file", "name": "data.bin",
+     "encoding": "base64", "content": "SGVsbG8="},
+    {"type": "dir", "name": "home", "children": [
+      {"type": "file", "name": "notes.txt",
+       "encoding": "utf-8", "content": "заметки"}
+    ]}
+  ]
+}

@@ -1,26 +1,36 @@
 import argparse
 import os
+import copy
+import json
+import shlex
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
-import shlex
 
 VFS_NAME = "MyVFS"
+DEFAULT_VFS = {"type": "dir", "name": "/", "children": []}
+error_vfs = False
 
 root = None
 out = None
 entry = None
 
-def init_gui(vfs_path, script_path):
+vfs = None
+vfs_path = None
+vfs_original = None
+
+def init_gui(vfs_path_arg, script_path):
     """Создаёт окно, виджеты, запускает скрипт и главный цикл.
 
     Args:
-        vfs_path (str | None): Путь к VFS.
+        vfs_path_arg (str | None): Путь к VFS.
         script_path (str | None): Путь к скрипту.
 
     Returns:
         None
     """
-    global root, out, entry
+    global root, out, entry, vfs, vfs_path, vfs_original
+
+    vfs_path = vfs_path_arg
 
     root = tk.Tk()
     title = os.path.basename(vfs_path) if vfs_path else "default"
@@ -43,6 +53,11 @@ def init_gui(vfs_path, script_path):
     entry.bind("<Return>", on_enter)
 
     debug_config(vfs_path, script_path)
+
+    vfs = load_vfs(vfs_path)
+    vfs_original = copy.deepcopy(vfs)
+    if not error_vfs:
+        print_line(f"VFS загружена: {vfs_path or 'default'}\n")
 
     if script_path:
         run_script(script_path)
@@ -101,17 +116,58 @@ def run_command(cmd, args):
         bool: True при успехе, False при неизвестной команде.
     """
     if cmd == "ls":
-        print_line(f"ls: аргументы = {args}")
-        return True
+        return cmd_ls(args)
     if cmd == "cd":
-        print_line(f"cd: аргументы = {args}")
-        return True
+        return cmd_cd(args)
+    if cmd == "vfs-init":
+        return cmd_vfs_init()
     if cmd == "exit":
-        root.destroy()
-        return True
+        return cmd_exit()
 
     print_line(f"{cmd}: команда не найдена")
     return False
+
+def cmd_ls(args):
+    """Выполняет команду ls."""
+    print_line(f"ls: аргументы = {args}")
+    return True
+
+def cmd_cd(args):
+    """Выполняет команду cd."""
+    print_line(f"cd: аргументы = {args}")
+    return True
+
+def cmd_exit():
+    """Выполняет команду exit."""
+    root.destroy()
+    return True
+
+def cmd_vfs_init():
+    """Сбрасывает VFS к состоянию по умолчанию.
+
+    Заменяет текущую VFS на VFS по умолчанию и очищает физический
+    файл, если он был задан.
+
+    Returns:
+        bool: True при успехе.
+    """
+    global vfs, vfs_original
+
+    vfs = copy.deepcopy(DEFAULT_VFS)
+    vfs_original = copy.deepcopy(DEFAULT_VFS)
+
+    if vfs_path:
+        try:
+            with open(vfs_path, "w", encoding="utf-8") as f:
+                json.dump(DEFAULT_VFS, f)
+            print_line(f"vfs-init: VFS сброшена, файл очищен: {vfs_path}")
+        except OSError as e:
+            print_line(f"vfs-init: не удалось очистить файл: {e}")
+            return False
+    else:
+        print_line("vfs-init: VFS сброшена к default")
+
+    return True
 
 def execute(line):
     """Разбирает и выполняет строку.
@@ -221,6 +277,31 @@ def on_enter(event):
     if not line.strip():
         return
     execute(line)
+
+def load_vfs(path):
+    """Загружает VFS из JSON-файла.
+
+    Args:
+        path (str | None): Путь к файлу. None - VFS по умолчанию.
+
+    Returns:
+        dict: Корневой узел VFS.
+    """
+    global error_vfs
+    error_vfs = False
+
+    if not path:
+        return copy.deepcopy(DEFAULT_VFS)
+    if not os.path.isfile(path):
+        print_line(f"VFS не найден: {path}, берём default\n")
+        error_vfs = True
+        return copy.deepcopy(DEFAULT_VFS)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print_line(f"Ошибка загрузки VFS: {e}")
+        return copy.deepcopy(DEFAULT_VFS)
 
 def main():
     """Точка входа в программу"""

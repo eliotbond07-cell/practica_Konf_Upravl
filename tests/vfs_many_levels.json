@@ -1,0 +1,20 @@
+{
+  "type": "dir",
+  "name": "/",
+  "children": [
+    {"type": "dir", "name": "usr", "children": [
+      {"type": "dir", "name": "local", "children": [
+        {"type": "dir", "name": "share", "children": [
+          {"type": "file", "name": "info.txt",
+           "encoding": "utf-8", "content": "deep"}
+        ]}
+      ]}
+    ]},
+    {"type": "dir", "name": "home", "children": [
+      {"type": "dir", "name": "user", "children": [
+        {"type": "file", "name": "readme.md",
+         "encoding": "utf-8", "content": "# hi"}
+      ]}
+    ]}
+  ]
+}

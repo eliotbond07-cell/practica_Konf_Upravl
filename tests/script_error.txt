@@ -1,6 +1,7 @@
 ls
 ls -la /tmp
 ls "моя папка"
+vfs-init
 hippo
 ls fhk
 exit
