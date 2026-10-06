@@ -10,6 +10,7 @@ from tkinter import scrolledtext, messagebox
 VFS_NAME = "MyVFS"
 DEFAULT_VFS = {"type": "dir", "name": "/", "children": []}
 error_vfs = False
+max_amount_args = 2
 
 root = None
 out = None
@@ -291,7 +292,7 @@ def cmd_mv(args):
     Returns:
         bool: True при успехе.
     """
-    if len(args) != 2:
+    if len(args) != max_amount_args:
         print_line("mv: требуется <источник> <назначение>")
         return False
 
